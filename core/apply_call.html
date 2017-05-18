@@ -1,0 +1,105 @@
+<!DOCTYPE HTML>
+<html>
+
+<body>
+
+    <a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Function/apply">Function.prototype.apply()</a>
+    <div>
+      apply() 方法在指定 this 值和参数（参数以数组或类数组对象的形式存在）的情况下调用某个函数。
+      
+    </div>
+  <script type="text/javascript">
+    //Apply
+
+    //define a Person class
+    function Person(name, age) {
+      this.name = name;
+      this.age = age;
+    }
+
+    //define a Student class
+    function Student(name, age, grade) {
+      Person.apply(this, arguments); //apply this (student) with arguments
+      this.grade = grade;
+    } 
+     
+    //create a Student instance
+    var student = new Student("zhangsan", 21, "Grade 1");
+    
+    //test
+    console.log("name:" + student.name + "\n" + "age:" + student.age + "\n" + "grade:" + student.grade);
+    //The result will be: name:zhangsan age:21  grade:Grade 1  
+    //In Student class, there is no any statements to assign values to "name" and "age", why student instance has these two attributes?
+    //This is done by [apply] method
+
+    /*
+      apply的一些其他巧妙用法
+        apply方法的第一个参数是对象(this), 第二个参数是一个数组集合, 在调用Person的时候,他需要的不是一个数组,但是为什么他给我一个数组我仍然可以将数组解析为一个一个的参数?
+        这个就是apply的一个巧妙的用处 --- 可以将一个数组默认的转换为一个参数列表([param1,param2,param3] 转换为 param1,param2,param3) 
+        这个如果让我们用程序来实现将数组的每一个项,来装换为参数的列表,可能都得费一会功夫,借助apply的这点特性,所以就有了以下高效率的方法:
+    */
+    //E.g.
+    /*
+      因为Math.max 参数里面不支持Math.max([param1,param2]) 也就是数组,
+      但是它支持Math.max(param1,param2,param3…),所以可以根据刚才apply的那个特点来解决 
+      var max=Math.max.apply(null,array), 这样轻易的可以得到一个数组中最大的一项(apply会将一个数组装换为一个参数接一个参数的传递给方法)
+      
+      这块在调用的时候第一个参数给了一个null,这个是因为没有对象去调用这个方法,我只需要用这个方法帮我运算,得到返回的结果就行,.所以直接传递了一个null过去
+    */
+    var numberArray = [];
+    numberArray.push(7);
+    numberArray.push(11);
+    numberArray.push(9);
+    console.log(Math.max.apply(null, numberArray));
+
+    /*
+      Array.prototype.push 可以实现两个数组合并
+      同样push方法没有提供push一个数组,但是它提供了push(param1,param,…paramN) 所以同样也可以通过apply来装换一下这个数组,代码如下:
+
+      注意这个地方 Array.prototype.push.apply(arr1,arr2); 此处实际上是扩展了arr1，这与Array.prototype.concat() 不同, concat() 方法是返回一个新数组
+    */
+    var arr1=new Array("1","2","3");  
+    var arr2=new Array("4","5","6");  
+
+    Array.prototype.push.apply(arr1,arr2);  
+    console.log("arr1=" + arr1);
+    console.log("arr2=" + arr2);
+
+    console.log("arr2.concat(arr1)=" + arr2.concat(arr1));
+    console.log("arr2=" + arr2);
+
+  </script>
+
+ <script type="text/javascript">
+    //Call
+    function Person(name, age, sex) {
+      this.name = name;
+      this.age = age;
+      this.sex = sex;
+      this.say = function () {
+        console.log("name：" + name);
+      }
+    }
+    //call方式
+    function student(name, age) {
+      Person.call(this, name, age);
+    }
+    //apply方式
+    function teacher(name, sex) {
+      Person.apply(this, [name, sex]);
+      //Person.apply(this,arguments);
+    }
+    //call vs aplly:  
+    //1, The first parameter is this, means the current object or context 
+    //2, The second parameter is different, method call needs arguments one by one, method apply needs an arguments array
+    var per = new Person("sm", 21, "women");
+    per.say();//output:sm
+    var stu = new student("zs", 22);
+    stu.say();	//output: zs
+    var tea = new teacher("smzs", "men");
+    tea.say();	//output: smzs
+</script>
+
+</body>
+
+</html>
